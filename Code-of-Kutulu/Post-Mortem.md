@@ -19,18 +19,31 @@ For wanderers, this was fairly straightfowrard. I just used [Dijkstra's algorith
 > Near the end, I started precalculating this on the first turn for each starting cell, so I had the 'walking distance' from each cell to each other cell ready. It honestly didn't seem to affect performance that much, though.
 
 After calculating the map, I made a couple of adjustments to the resulting values:
-- if the wanderer was targeting someone other than me, I cut off the calculation for distances > `dist(wanderer, target)` (because I was safe from that wanderer targeting me if I didn't get closer than that)
-- If the wanderer was still spawning, I added the time-remaining value to each cell.
+- if the wanderer is targeting someone other than me, I cut off the calculation for distances >`dist(wanderer, target)` (because I was safe from that wanderer targeting me if I didn't get closer than that)
+- If the wanderer is still spawning, I added the time-remaining value to each cell.
+- If the wanderer is targeting me, then assume that he will go directly toward me; so for turns 0 through `dist(wanderer, me)`, only mark the cells on a direct path to me as dangerous. Then, past that, use the Dijkstra's as usual.
+  - I wrote this toward the end, when I noticed that my bot was "afraid" of running around in a circle if the wanderer who was following him was halfway through that circle.
+  
+> I thought about this for a while, and ended up not using light in these calculations at all - since this is supposed to be how long it will actually take them to get there if they tried, not how long they think it might take.
 
 #### Slashers
 Slashers were, of course, much more complicated. I tried ignoring "wandering" slashers, and then tried pretending they were wanderers. Both worked OK, but far from perfect.
 
 I ended up having to do Dijkstra's on a sort of "3D map" where the third dimension was the slasher state. So you can think of it as 6<sup>1</sup> layers of maps, each layer corresponding to a slasher state, with information on how soon you might see a slasher in a given cell, in that particular state. Then you can imagine a directed graph drawn through this 3D map, with an edge from A to B meaning that it's possible for the slasher to transition from location+state A to location+state B. and the weight of the edge is how long it would take the slasher to make that transition (e.g. 2 turns to go from stalking to rushing). This representation allowed me to precisely calculate when and where slashers can strike, without thinking too much about it - just wrote a "possible transitions and distance from state+location A" function, and then plugged it into a standard Dijkstra implementation.
 
-Getting this "transition function" right was super fiddly to get all the slasher rules right.
+Getting this "transition function" right was super fiddly, hard to get all the slasher rules right.
 
 <sup>1</sup> *Wait, Slashers have 5 states!* Yeah, I added a fake 6th state of "actually dealing damage now", which immediately transitioned into "Stunned". The "dealing damage" state is what I subsequently used as the actual threat map, and threw out the rest.
 
-For transitions from the RUSH state, I also threw in some optimizations where if I was pretty sure that the current target is going to be in LoS by the time the Slasher strikes, I only marked the target's position as dangerous; otherwise, I considered everything within the LoS at time of rushing to be dangerous.
+For transitions from the RUSH state, if I was pretty sure that the current target is going to be in LoS by the time the Slasher strikes, I only marked the target's position as dangerous; otherwise, I considered everything within the LoS at time of rushing to be dangerous.
 
-> I did not precalculate any of this, since there are dependencies on current state (mostly the target).
+> I did not precalculate any of this on turn 0, since there are dependencies on current state (mostly the target).
+
+### Timing Map
+Combine all the threat maps from all the enemies into a "timing map" by taking the min. time across all maps for each cell. So for each cell, the timing map tells me how soon I think an enemy would be able to get there. Or in other words, how long I think that cell will remain "safe" for. Obviously, this is somewhat naive, as it does not account for various other game events that change the state. But it's good enough for the heuristics I was going to use it for.
+
+### Sanity Bonus Map
+Separately, I calculated a map of "Sanity Bonuses": the places on the map that were better for my sanity. This just counted the benefit I would get **on this turn** if I were at this cell **right now**. Also pretty naive, but it was close enough to make decisions about which direction it'd be beneficial to head in.
+- **Shelters** were the easiest - for each active shelter, add the shelter bonus to that cell on the map.
+- **Plans** were also pretty straightforward - for each plan, for each cell that the plan reaches, add the plan bonus.
+- I also modeled **Group bonuses** in the same map: for each cell that was close enough to at least one other explorer, add the difference between `sanity_loss_lonely` and `sanity_loss_group`
