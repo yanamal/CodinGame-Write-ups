@@ -137,3 +137,17 @@ The two places where I checked for abilit use were:
     
 The yell logic worked really well; the plan one seemed reasonable. I think empirically, I did slightly better after I implemented the light one, but it's hard to tell.
     
+## Retrospective/Musings
+
+### "Playing it safe" is not safe
+I saw the most dramatic improvements in my bot's performance when I refined my heuristics to be less overly-cautious (but more precise) - for example, knowing when to only count one spot in a slashers' LoS as dangerous (not the entire LoS).
+
+When the bot is too conservative in terms of what it considers "safe" choices, it has a harder time realistically knowing the "least unsafe" choice.
+
+### Emergent behaviors are very satisfying to watch
+It was very satisfying to watch my bot do something really weird, try to debug what was "wrong", then through the debugging realize that in fact, that *was* the best choice to make in the situation!
+
+#### Bot "personality"
+The resulting bot definitely displayed a preference for trying to survive independently, without "listening" to the other explorers; and if they followed him, then great! Otherwise, we can handle ourselves :P (especially if there are shelters on the map... I never knew shelters were so useful!)
+
+I didn't code it this way on purpose, but my sensibilities about what is or is not a good way of making a decision accidentally affected the "personality" of my bot.
