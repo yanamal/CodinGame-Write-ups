@@ -1,6 +1,6 @@
 # Code of Kutulu (contest) Post Mortem
 
-- [[Initial Bot](Initial-Bot.md)](#initial-botinitial-botmd)
+- [Initial Bot](#initial-botinitial-botmd)
 - [Actual Bot](#actual-bot)
   - [1. "Threat maps" for each minion](#1-threat-maps-for-each-minion)
     - [Wanderers](#wanderers)
