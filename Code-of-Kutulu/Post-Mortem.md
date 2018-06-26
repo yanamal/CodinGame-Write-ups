@@ -53,7 +53,7 @@ I ended up having to do Dijkstra's on a sort of "3D map" where the third dimensi
 
 Getting this "transition function" right was super fiddly, hard to get all the slasher rules right.
 
-<sup>1</sup> *Wait, Slashers only have 5 states!* Yeah, I added a fake 6th state of "actually dealing damage now", which immediately transitioned into "Stunned". The "dealing damage" state is what I subsequently used as the actual threat map, and threw out the rest.
+<sup>1</sup> *Wait, Slashers only have 5 states!* Yeah, I added a fake 6th state of "actually dealing damage now", which immediately transitioned into "Stunned". The "dealing damage" state is what I subsequently used as the actual threat map, and threw out the rest. This meant that I could also model the cases where the the slasher got confused and knocked himself out without doing any damage (so occasionally, my bot kept safe by standing on top of the slasher :D )
 
 For transitions from the RUSH state, if I was pretty sure that the current target is going to be in LoS by the time the Slasher strikes, I only marked the target's position as dangerous; otherwise, I considered everything within the LoS at time of rushing to be dangerous.
 
@@ -87,12 +87,12 @@ In practice, a lot of the time, the damage values are the same across most/all o
 
 > Note: For my purposes, it was important to collect **all** moves with the same outcome, since I could then filter them by other heuristics.
 
-Later I also added "average-case" damage calculation: for each one of my possible moves, calculate the **average** damage to me and others across all possible opponent moves. Of course, it would be a much more accurate average if it took into account the likelihood of each combination; but I did not want to go down that rabbit hole at that point.
+Later I also added "average-case" damage calculation: for each one of my possible moves, calculate the **average** damage to me and others across all possible opponent moves. I used this in a follow-up heuristic to pick between moves that looked equally good by other criteria. Of course, it would be a much more accurate average if it took into account the likelihood of each combination; but I did not want to go down that rabbit hole at that point.
 
 ### 6. Finally, the heuristics!
 Well, they do say that 80% of AI is representation. I forget who said that though. And whether that's actually what they said.
 
-Just to be clear, though, I did not write all of the above in one go before writing heuristics. It all evolved over time together. Though I was able to add quite a few heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the full representation in place.
+Just to be clear, though, I did not write all of the above in one go before writing heuristics. It all evolved over time together. Though I *was* able to add tons of heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the full representation in place.
 
 - First, use the minimax function above to filter the possible moves. Since minimax looks for the **best** worst-case move, it will always return at least one move.
 - Then filter for moves that actually are part of the "safe walkable path" tree
@@ -150,6 +150,8 @@ When the bot is too conservative in terms of what it considers "safe" choices, i
 
 ### Emergent behaviors are very satisfying to watch
 It was very satisfying to watch my bot do something really weird, try to debug what was "wrong", then through the debugging realize that in fact, that *was* the best choice to make in the situation!
+
+"What- why-  ... oh, I see, carry on."
 
 #### Bot "personality"
 The resulting bot definitely displayed a preference for trying to survive independently, without "listening" to the other explorers; and if they followed him, then great! Otherwise, we can handle ourselves :P (especially if there are shelters on the map... I never knew shelters were so useful!)
