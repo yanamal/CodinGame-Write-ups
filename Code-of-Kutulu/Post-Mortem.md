@@ -33,7 +33,7 @@ I ended up having to do Dijkstra's on a sort of "3D map" where the third dimensi
 
 Getting this "transition function" right was super fiddly, hard to get all the slasher rules right.
 
-<sup>1</sup> *Wait, Slashers have 5 states!* Yeah, I added a fake 6th state of "actually dealing damage now", which immediately transitioned into "Stunned". The "dealing damage" state is what I subsequently used as the actual threat map, and threw out the rest.
+<sup>1</sup> *Wait, Slashers only have 5 states!* Yeah, I added a fake 6th state of "actually dealing damage now", which immediately transitioned into "Stunned". The "dealing damage" state is what I subsequently used as the actual threat map, and threw out the rest.
 
 For transitions from the RUSH state, if I was pretty sure that the current target is going to be in LoS by the time the Slasher strikes, I only marked the target's position as dangerous; otherwise, I considered everything within the LoS at time of rushing to be dangerous.
 
@@ -52,10 +52,20 @@ Separately from all that threat stuff, calculate a map of "Sanity Bonuses": the 
 - I also modeled **Group bonuses** in the same map: for each cell that was close enough to at least one other explorer, add the difference between `sanity_loss_lonely` and `sanity_loss_group`
 
 ### 5. Give up and minimax
+The threat/walkable paths data was reasonably good for reasoning about things in the middle-term, but for very short-term predictions, I ended up needing something more precise once I got to Legend. So I did a minimax calculation to predict (and avoid) worst-case damage to me, on just this turn:
+- For each of my possible moves:
+  - consider all combinations of possible other-explorer moves (not counting any abilities; which is at most 125, and in practice usually more like 30-80; multiplied by the number of my possible moves, of course)
+    - for each combination, "simulate" the damage that all the minions will do to everybody on that turn. Not, by any means, a full simulation - I didn't even bother calculating where the minions would actually end up. Just whether they'd be able to deal damage, and to whom.
+  - pick the combination(s) that are the worst case: (this is the **max** part of minimax)
+    - all combinations with the the most damage to me
+      - out of those, all combinations with the least cumulative damage to others.
+- Now we have the worst-case outcome for each move I can make; pick the move(s) with the best worst-case outcome.
+
+> Note: For my purposes, it was important to collect **all** moves with the same outcome, since I could then filter them by other heuristics.
 
 ### 6. Finally, the heuristics!
 Well, they do say that 80% of AI is representation. I forget who said that though. And whether that's actually what they said.
 
-Just to be clear, though, I did not write all of the above in one go before writing heuristics. It just evolved this way over time. though I was able to add a massive number of heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the representation in place.
+Just to be clear, though, I did not write all of the above in one go before writing heuristics. It all evolved over time together. Though I was able to add a massive number of heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the full representation in place.
 
 ### 7. Sprinkle in some abilities
