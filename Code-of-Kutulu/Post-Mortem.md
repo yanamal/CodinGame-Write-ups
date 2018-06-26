@@ -10,7 +10,7 @@ My final bot relied on calculating lots of different "maps" of important per-cel
 
 Using abilities was sort of separate, but sort of intermixed with the move decision making.
 
-### 1. Calculate "threat maps" for each minion
+### 1. "Threat maps" for each minion
 For each minion, and for each walkable square on the map, calculate how soon a minion could reach this cell (and deal damage to it).
 
 #### Wanderers
@@ -42,19 +42,20 @@ For transitions from the RUSH state, if I was pretty sure that the current targe
 ### 2. Timing Map
 Combine all the threat maps from all the enemies into a "timing map" by taking the min. time across all maps for each cell. So for each cell, the timing map tells me how soon I think an enemy would be able to get there. Or in other words, how long I think that cell will remain "safe" for. Obviously, this is somewhat naive, as it does not account for various other game events that change the state. But it's good enough for the heuristics I was going to use it for.
 
-### 3. Sanity Bonus Map
-Separately, calculate a map of "Sanity Bonuses": the places on the map that were better for my sanity. This just counted the benefit I would get **on this turn** if I were at this cell **right now**. Also pretty naive, but it was close enough to make decisions about which direction it'd be beneficial to head in.
+### 3. Walkable Paths
+Using the timing map, calculate all the places I could reach before any minion would reach them. This also used a variation on Dijkstra's algorithm, where you could go from cell A to its neighbor B if and only if your time-to-get-there was lower than cell B's rating on the Timing Map. And since Dijkstra's starts at your location and expands out, it naturally made sure that only nodes with an actual safe path to them were actually calculated. Plus, as a side effect, Dijkstra's also can generate the actual tree of shortest paths, so if I knew I wanted to get to somewhere that was considered "safe", I already had the information on how I'd actually go about getting there.
+
+### 4. Sanity Bonus Map
+Separately from all that threat stuff, calculate a map of "Sanity Bonuses": the places on the map that are better for my sanity. This just counted the benefit I would get **on this turn** if I were at this cell **right now**. Also pretty naive, but it was close enough to make decisions about which direction it'd be beneficial to head in.
 - **Shelters** were the easiest - for each active shelter, add the shelter bonus to that cell on the map.
 - **Plans** were also pretty straightforward - for each plan, for each cell that the plan reaches, add the plan bonus.
 - I also modeled **Group bonuses** in the same map: for each cell that was close enough to at least one other explorer, add the difference between `sanity_loss_lonely` and `sanity_loss_group`
 
-### 4. Walkable Paths
-
 ### 5. Give up and minimax
 
 ### 6. Finally, the heuristics!
-Well, they do say that 80% of AI is representation. I forget who said that though and whether that's actually what they said.
+Well, they do say that 80% of AI is representation. I forget who said that though. And whether that's actually what they said.
 
-(Just to be clear, though, I did not write all of the above in one go before writing heuristics. It just evolved over time.)
+Just to be clear, though, I did not write all of the above in one go before writing heuristics. It just evolved this way over time. though I was able to add a massive number of heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the representation in place.
 
 ### 7. Sprinkle in some abilities
