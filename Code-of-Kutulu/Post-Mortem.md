@@ -24,7 +24,7 @@ My final bot relied on calculating lots of different "maps" of important per-cel
 
 Using abilities was sort of separate, but sort of intermixed with the move decision making.
 
-It's a bit long, feel free to skim or [skip to the good part](#6-finally-the-heuristics)
+This is a bit long, feel free to skim or [skip to the good part](#6-finally-the-heuristics)
 
 ### 1. "Threat maps" for each minion
 For each minion, and for each walkable square on the map, calculate how soon a minion could reach this cell (and deal damage to it).
