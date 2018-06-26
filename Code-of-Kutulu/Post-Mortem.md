@@ -95,9 +95,29 @@ Just to be clear, though, I did not write all of the above in one go before writ
 Phew! now actually move.
 
 #### Notes
-- the ordering and the speicific filters are basically a result of lots of trial-and-error tweaking (mostly on the last and second-to-last day)
+- Most of the time, depending on the situation, only 1-3 filters actually filtered anything - the rest just had "no opinion" (e.g. "there's nobody close by, so none of your potential moves create a danger of being yelled at")
+- The ordering and the specific filters are basically a result of lots of trial-and-error tweaking (mostly on the last and second-to-last day). The bot's performance was **super** sensitive to the ordering, which does make sense; but I couldn't always predict which filter would be more important before trying it.
 - I tried pretty hard to get rid of that first "safety threshold" filter - it seemed unnecessarily conservative and arbitrary, and I kept thinking "now that I have minimax..." "now that I'm doing longest-ttl anyway..." - but the bot always ended up worse without it.
 - I tried a bunch of heuristics that would average out the expected bonus/safety/etc. down a (branching) path, but none of them worked nearly as well as just "biggest bonus", "most safety", etc.
 - the "dead end" and "don't go backwards" filters are at the very end because they need to apply whether or not we fell back on the minimax calculation.
+- The "closer to other players" is actually not the only filter that prioritizes proximity, since the Sanity Bonus Map also marks spots close to other players as more beneficial. However, if the "safe path" does not reach any other players - either it's not particularly safe, or the other players are quite far away - then those cells on the map don't come into play through the sanity bonus filter.
 
 ### 7. Sprinkle in some abilities
+
+I did also use abilities. If I had designed the moves/filtering data structures a bit better, I could have probably slotted them in as "moves" and written more filters for them. As it is, I slotted them into a couple of places in the decision sequeunce, so that they canceled any decisions that came afterwards (this was easy to do, since I could just change the action from MOVE to YELL/LIGHT/PLAN and even if I calculated a move and passed down the coordinates, the YELL/LIGHT/PLAN would take over. So my bot usually says something like "YELL 10 13").
+
+The two places where I checked for abilit use were:
+1. before any move heuristics at all, check whether yelling would make another player take damage. Namely:
+  - There is a player within YELL distance whom you have not yelled at
+  - That player's position has a danger of <= 2 on the Timing Map (the cell will get hit by a minion in the next 2 turns)
+  - Your own position has a danger of >= 2 on the Timing Map (you will be able to get away after yelling)
+1. After either the safe-path filtering or the minimax fallback, see if staying put is still one of the options you're considering. If so, check for whether it might be a good idea to use abilities (in this order of preference)
+  - PLAN: do it if you think it will not take you over the max sanity (250). Same naive heuristic as in the [initial bot](Initial-Bot.md#consider-using-abilities). It's silly, but it seemed good enough (didn't spam plan too much, didn't use it in totally unreasonable situations)
+  - YELL: same as the first YELL heuristic, except don't bother checking if it's safe to stand still for a turn while yelling (since you're already considering it as one of the best possible moves).
+  - LIGHT: use light if all of the following are true:
+    - there is a wanderer targeting me
+    - he is > half the light radius away (otherwise light would no longer help)
+    - there is an explorer further away from me than the wanderer is (so the light won't help him as much as it helps me)
+    
+The yell logic worked really well; the plan one seemed reasonable. I think empirically, I did slightly better after I implemented the light one, but it's hard to tell.
+    
