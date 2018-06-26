@@ -31,7 +31,7 @@ Using abilities was sort of separate, but sort of intermixed with the move decis
 This is a bit long, feel free to skim or [skip to the good part](#6-finally-the-heuristics)
 
 ### 1. "Threat maps" for each minion
-For each minion, and for each walkable square on the map, calculate how soon a minion could reach this cell (and deal damage to it).
+For each minion, and for each walkable square on the map, calculate how soon the minion could reach this cell (and deal damage to it).
 
 #### Wanderers
 For wanderers, this was fairly straightfowrard. I just used [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) to calculate the "distance" from the wanderer to each cell on the map. 
