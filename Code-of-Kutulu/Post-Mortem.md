@@ -39,11 +39,22 @@ For transitions from the RUSH state, if I was pretty sure that the current targe
 
 > I did not precalculate any of this on turn 0, since there are dependencies on current state (mostly the target).
 
-### Timing Map
+### 2. Timing Map
 Combine all the threat maps from all the enemies into a "timing map" by taking the min. time across all maps for each cell. So for each cell, the timing map tells me how soon I think an enemy would be able to get there. Or in other words, how long I think that cell will remain "safe" for. Obviously, this is somewhat naive, as it does not account for various other game events that change the state. But it's good enough for the heuristics I was going to use it for.
 
-### Sanity Bonus Map
-Separately, I calculated a map of "Sanity Bonuses": the places on the map that were better for my sanity. This just counted the benefit I would get **on this turn** if I were at this cell **right now**. Also pretty naive, but it was close enough to make decisions about which direction it'd be beneficial to head in.
+### 3. Sanity Bonus Map
+Separately, calculate a map of "Sanity Bonuses": the places on the map that were better for my sanity. This just counted the benefit I would get **on this turn** if I were at this cell **right now**. Also pretty naive, but it was close enough to make decisions about which direction it'd be beneficial to head in.
 - **Shelters** were the easiest - for each active shelter, add the shelter bonus to that cell on the map.
 - **Plans** were also pretty straightforward - for each plan, for each cell that the plan reaches, add the plan bonus.
 - I also modeled **Group bonuses** in the same map: for each cell that was close enough to at least one other explorer, add the difference between `sanity_loss_lonely` and `sanity_loss_group`
+
+### 4. Walkable Paths
+
+### 5. Give up and minimax
+
+### 6. Finally, the heuristics!
+Well, they do say that 80% of AI is representation. I forget who said that though and whether that's actually what they said.
+
+(Just to be clear, though, I did not write all of the above in one go before writing heuristics. It just evolved over time.)
+
+### 7. Sprinkle in some abilities
