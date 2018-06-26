@@ -128,16 +128,16 @@ I did also use abilities. If I had designed the moves/filtering data structures 
 
 The two places where I checked for ability use were:
 1. before any move heuristics at all, check whether yelling would make another player take damage. Namely:
-  - There is a player within YELL distance whom you have not yelled at
-  - That player's position has a danger of <= 2 on the Timing Map (the cell will get hit by a minion in the next 2 turns)
-  - Your own position has a danger of >= 2 on the Timing Map (you will be able to get away after yelling)
+    - There is a player within YELL distance whom you have not yelled at
+    - That player's position has a danger of <= 2 on the Timing Map (the cell will get hit by a minion in the next 2 turns)
+    - Your own position has a danger of >= 2 on the Timing Map (you will be able to get away after yelling)
 1. After either the safe-path filtering or the minimax fallback, see if staying put is still one of the options you're considering. If so, check for whether it might be a good idea to use abilities (in this order of preference)
-  - PLAN: do it if you think it will not take you over the max sanity (250). Same naive heuristic as in the [initial bot](Initial-Bot.md#consider-using-abilities). It's silly, but it seemed good enough (didn't spam plan too much, didn't use it in totally unreasonable situations)
-  - YELL: same as the first YELL heuristic, except don't bother checking if it's safe to stand still for a turn while yelling (since you're already considering it as one of the best possible moves).
-  - LIGHT: use light if all of the following are true:
-    - there is a wanderer targeting me
-    - he is > half the light radius away (otherwise light would no longer help)
-    - there is an explorer further away from me than the wanderer is (so the light won't help him as much as it helps me)
+    - PLAN: do it if you think it will not take you over the max sanity (250). Same naive heuristic as in the [initial bot](Initial-Bot.md#consider-using-abilities). It's silly, but it seemed good enough (didn't spam plan too much, didn't use it in totally unreasonable situations)
+    - YELL: same as the first YELL heuristic, except don't bother checking if it's safe to stand still for a turn while yelling (since you're already considering it as one of the best possible moves).
+    - LIGHT: use light if all of the following are true:
+      - there is a wanderer targeting me
+      - he is > half the light radius away (otherwise light would no longer help)
+      - there is an explorer further away from me than the wanderer is (so the light won't help him as much as it helps me)
     
 The yell logic worked really well; the plan one seemed reasonable. I think empirically, I did slightly better after I implemented the light one, but it's hard to tell.
     
