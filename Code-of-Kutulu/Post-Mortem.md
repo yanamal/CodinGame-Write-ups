@@ -126,7 +126,7 @@ Phew! now actually move.
 
 I did also use abilities. If I had designed the moves/filtering data structures a bit better, I could have probably slotted them in as "moves" and written more filters for them. As it is, I slotted them into a couple of places in the decision sequeunce, so that they canceled any decisions that came afterwards (this was easy to do, since I could just change the action from MOVE to YELL/LIGHT/PLAN and even if I calculated a move and passed down the coordinates, the YELL/LIGHT/PLAN would take over. So my bot usually says something like "YELL 10 13").
 
-The two places where I checked for abilit use were:
+The two places where I checked for ability use were:
 1. before any move heuristics at all, check whether yelling would make another player take damage. Namely:
   - There is a player within YELL distance whom you have not yelled at
   - That player's position has a danger of <= 2 on the Timing Map (the cell will get hit by a minion in the next 2 turns)
