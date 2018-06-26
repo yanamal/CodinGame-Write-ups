@@ -16,7 +16,7 @@ For each minion, and for each walkable square on the map, calculate how soon a m
 #### Wanderers
 For wanderers, this was fairly straightfowrard. I just used [Dijkstra's algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) to calculate the "distance" from the wanderer to each cell on the map. 
 
-> Near the end, I started precalculating this on the first turn for each starting cell, so I had the 'walking distance' from each cell to each other cell ready. It honestly didn't seem to affect performance that much, though.
+> Near the end of the competition, I started precalculating this on the first turn for each starting cell, so I had the 'walking distance' from each cell to each other cell ready. It honestly didn't seem to affect performance that much, though.
 
 After calculating the map, I made a couple of adjustments to the resulting values:
 - if the wanderer is targeting someone other than me, I cut off the calculation for distances >`dist(wanderer, target)` (because I was safe from that wanderer targeting me if I didn't get closer than that)
@@ -61,11 +61,28 @@ The threat/walkable paths data was reasonably good for reasoning about things in
       - out of those, all combinations with the least cumulative damage to others.
 - Now we have the worst-case outcome for each move I can make; pick the move(s) with the best worst-case outcome.
 
+In practice, a lot of the time, the damage values are the same across most/all of the possibilities: the particular explorer is just not going to get damaged this turn, or my move is just not going to affect what happens to the other explorers in the best/worst case. This is fine, and just means that the minimax part offered no opinion.
+
 > Note: For my purposes, it was important to collect **all** moves with the same outcome, since I could then filter them by other heuristics.
+
+Later I also added "average-case" damage calculation: for each one of my possible moves, calculate the **average** damage to me and others across all possible opponent moves. Of course, it would be a much more accurate average if it took into account the likelihood of each combination; but I did not want to go down that rabbit hole at that point.
 
 ### 6. Finally, the heuristics!
 Well, they do say that 80% of AI is representation. I forget who said that though. And whether that's actually what they said.
 
-Just to be clear, though, I did not write all of the above in one go before writing heuristics. It all evolved over time together. Though I was able to add a massive number of heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the full representation in place.
+Just to be clear, though, I did not write all of the above in one go before writing heuristics. It all evolved over time together. Though I was able to add quite a few heuristics - quite a few more than I ended up using - and iterate on them very quickly once I had the full representation in place.
+
+- First, use the minimax function above to filter the possible moves. Since minimax looks for the **best** worst-case move, it will always return at least one move.
+- Then filter for moves that actually are part of the "safe walkable path" tree
+  - for all of those, apply a bunch of "heuristic filters" based on some of the data above (in this order):
+    1. Filter out any moves that place you on a cell that has <= 2 "danger" on the Timing Map (in other words, you are liable to get hit next turn if you stand on those squares.
+    1. Filter for the moves that will eventually lead you to the biggest bonus (using the sanity bonus map, and the dikstra-based "safe paths", to decide what path can lead you where)
+    1. Out of those, filter for the paths with the closest bonus
+    1. Out of those, filter for the paths that have the "longest time to live" - the greatest value on the Timing Map, basically.
+    1. filter out cells where you are in danger of a "yell" attack - not only is someone able to yell at you, but being frozen in that cell will actually result in you being damaged (i.e. the "danger" of that spot on the Timing Map is <= 3)
+      - or don't filter anything out if all cells have that danger, anyway
+    1. Filter for the best (least) average expected damage to you, according to the averages from the minimax function
+    1. Same as above, but for best(most) average expected damage to opponents
+    1. Finally, filter for moves that will get you closest to other players.
 
 ### 7. Sprinkle in some abilities
