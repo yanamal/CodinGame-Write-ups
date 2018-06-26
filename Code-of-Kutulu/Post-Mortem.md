@@ -10,6 +10,8 @@ My final bot relied on calculating lots of different "maps" of important per-cel
 
 Using abilities was sort of separate, but sort of intermixed with the move decision making.
 
+It's a bit long, feel free to skim or [skip to the good part](#6-finally-the-heuristics)
+
 ### 1. "Threat maps" for each minion
 For each minion, and for each walkable square on the map, calculate how soon a minion could reach this cell (and deal damage to it).
 
@@ -79,10 +81,23 @@ Just to be clear, though, I did not write all of the above in one go before writ
     1. Filter for the moves that will eventually lead you to the biggest bonus (using the sanity bonus map, and the dikstra-based "safe paths", to decide what path can lead you where)
     1. Out of those, filter for the paths with the closest bonus
     1. Out of those, filter for the paths that have the "longest time to live" - the greatest value on the Timing Map, basically.
-    1. filter out cells where you are in danger of a "yell" attack - not only is someone able to yell at you, but being frozen in that cell will actually result in you being damaged (i.e. the "danger" of that spot on the Timing Map is <= 3)
-      - or don't filter anything out if all cells have that danger, anyway
+    1. filter out cells where you are in danger of a "yell" attack - not only is someone able to yell at you, but being frozen in that cell will actually result in you being damaged (i.e. the "danger" of that spot on the Timing Map is <= 3) (unless all cells have that danger, in which case, don't filter any out)
     1. Filter for the best (least) average expected damage to you, according to the averages from the minimax function
     1. Same as above, but for best(most) average expected damage to opponents
     1. Finally, filter for moves that will get you closest to other players.
+- After all of that, there could still be a few equally-good moves left; or, conversely, there could be no good moves left (usually because there were no "safe paths" found at all - we are surrounded!)
+
+  If the safe-path filtering didn't come up with any good safe moves, fall back on just the original minimax results.
+- At this point, we have settled on one or more moves we could make. Just in case there are more than one, do a little more filtering:
+  - filter out moves that lead into a "dead end" (e.g. Typhoon)
+  - finally, filter by preferring moves that aren't going "backwards": they are not where you're standing now or (even worse) where you were the turn before this one. This is to mitigate "waffling, where my bot would go back and forth between two relatively-good cells because he didn't see a reason to pick one over the other.
+
+Phew! now actually move.
+
+#### Notes
+- the ordering and the speicific filters are basically a result of lots of trial-and-error tweaking (mostly on the last and second-to-last day)
+- I tried pretty hard to get rid of that first "safety threshold" filter - it seemed unnecessarily conservative and arbitrary, and I kept thinking "now that I have minimax..." "now that I'm doing longest-ttl anyway..." - but the bot always ended up worse without it.
+- I tried a bunch of heuristics that would average out the expected bonus/safety/etc. down a (branching) path, but none of them worked nearly as well as just "biggest bonus", "most safety", etc.
+- the "dead end" and "don't go backwards" filters are at the very end because they need to apply whether or not we fell back on the minimax calculation.
 
 ### 7. Sprinkle in some abilities
