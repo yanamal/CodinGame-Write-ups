@@ -47,6 +47,8 @@ Combine all the threat maps from all the enemies into a "timing map" by taking t
 ### 3. Walkable Paths
 Using the timing map, calculate all the places I could reach before any minion would reach them. This also used a variation on Dijkstra's algorithm, where you could go from cell A to its neighbor B if and only if your time-to-get-there was lower than cell B's rating on the Timing Map. And since Dijkstra's starts at your location and expands out, it naturally made sure that only nodes with an actual safe path to them were actually calculated. Plus, as a side effect, Dijkstra's also can generate the actual tree of shortest paths, so if I knew I wanted to get to somewhere that was considered "safe", I already had the information on how I'd actually go about getting there.
 
+> **In hindsight**: this really should have been a 3D map, with the third dimension being time (i.e. turns). That way, each layer would have been "where I can safely get to N turns from now", and I would have been able to represent things like going in circles, or more importantly first staying put and then trying to get somewhere safe (and answer questions like "how much will I limit myself if I stay put this turn?"). 
+
 ### 4. Sanity Bonus Map
 Separately from all that threat stuff, calculate a map of "Sanity Bonuses": the places on the map that are better for my sanity. This just counted the benefit I would get **on this turn** if I were at this cell **right now**. Also pretty naive, but it was close enough to make decisions about which direction it'd be beneficial to head in.
 - **Shelters** were the easiest - for each active shelter, add the shelter bonus to that cell on the map.
